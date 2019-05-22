@@ -29,6 +29,8 @@
 
 #include <rcsc/geom/vector_2d.h>
 #include <rcsc/player/soccer_action.h>
+#include <rcsc/player/player_agent.h>
+
 
 class Bhv_BasicMove
     : public rcsc::SoccerBehavior {
@@ -40,6 +42,23 @@ public:
 
 private:
     double getDashPower( const rcsc::PlayerAgent * agent );
+};
+
+class Bhv_Block
+    : public rcsc::SoccerBehavior {
+public:
+    Bhv_Block()
+      { }
+
+    bool execute( rcsc::PlayerAgent * agent );
+private:
+    void updateBlockerUnum();
+    void updateBlockCycle(const rcsc::WorldModel & wm);
+    int getBlockCycle(const rcsc::AbstractPlayerObject * tm, rcsc::Vector2D pos, int cycle);
+    int blockCycle[12];
+    rcsc::Vector2D blockPos[12];
+    int blockerUnum = 0;
+
 };
 
 #endif
