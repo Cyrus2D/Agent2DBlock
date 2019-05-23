@@ -49,7 +49,7 @@
 
 #include "neck_offensive_intercept_neck.h"
 #include "chain_action/field_analyzer.h"
-
+#include <iostream>
 using namespace rcsc;
 
 /*-------------------------------------------------------------------*/
@@ -136,6 +136,7 @@ bool Bhv_Block::execute(PlayerAgent * agent)
     const WorldModel & wm = agent->world();
     updateBlockCycle(wm);
     updateBlockerUnum();
+    std::cout<<"block,"<<wm.time().cycle()<<","<<wm.self().unum()<<","<<blockerUnum<<std::endl;
     if (blockerUnum == wm.self().unum())
     {
         Vector2D targetPos = blockPos[wm.self().unum()];
@@ -203,6 +204,21 @@ int Bhv_Block::getBlockCycle(const AbstractPlayerObject *tm, Vector2D dribblePos
     if(tmPos.dist(dribblePos) < kickableArea)
         return 0;
 
+
+
+    double dist = tmPos.dist(dribblePos) - kickableArea;
+    int dashCycle = tm->playerTypePtr()->cyclesToReachDistance(dist);
+    int turnCycle = 0;
+
+    double diffAngle = ((dribblePos - tmPos).th() - tm->body()).abs();
+    double speed = tm->vel().r();
+    while(diffAngle > 15)
+    {
+        diffAngle -= tm->playerTypePtr()->effectiveTurn( ServerParam::i().maxMoment(), speed );
+        speed *= tm->playerTypePtr()->playerDecay();
+        turnCycle++;
+    }
+    return dashCycle + turnCycle;
     int reachCycle = FieldAnalyzer::predict_player_reach_cycle(tm,
                                                               dribblePos,
                                                               kickableArea,
